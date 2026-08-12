@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import "./Dealers.css";
 import "../assets/style.css";
 import Header from '../Header/Header';
+import { useNavigate } from 'react-router-dom';
 
 
 const PostReview = () => {
@@ -12,6 +13,7 @@ const PostReview = () => {
   const [year, setYear] = useState("");
   const [date, setDate] = useState("");
   const [carmodels, setCarmodels] = useState([]);
+  const navigate = useNavigate();
 
   let curr_url = window.location.href;
   let root_url = curr_url.substring(0,curr_url.indexOf("postreview"));
@@ -20,6 +22,9 @@ const PostReview = () => {
   let dealer_url = root_url+`djangoapp/dealer/${id}`;
   let review_url = root_url+`djangoapp/add_review`;
   let carmodels_url = root_url+`djangoapp/get_cars`;
+
+  // Get the current date in YYYY-MM-DD format
+  const currentDate = new Date().toISOString().split('T')[0];
 
   const postreview = async ()=>{
     let name = sessionStorage.getItem("firstname")+" "+sessionStorage.getItem("lastname");
@@ -58,32 +63,29 @@ const PostReview = () => {
 
   const json = await res.json();
   if (json.status === 200) {
-      window.location.href = window.location.origin+"/dealer/"+id;
+      //window.location.href = window.location.origin+"/dealer/"+id;
+      // Redirect after posting the review// Redirect after posting the review
+      navigate(`/dealer/${id}`); 
+  }else {
+    alert("Error posting review. Please try again.");
   }
 
   }
-  const get_dealer = async ()=>{
-    const res = await fetch(dealer_url, {
-      method: "GET"
-    });
+  const get_dealer = async () => {
+    const res = await fetch(dealer_url, { method: "GET" });
     const retobj = await res.json();
-    
-    if(retobj.status === 200) {
-      let dealerobjs = Array.from(retobj.dealer)
-      if(dealerobjs.length > 0)
-        setDealer(dealerobjs[0])
+
+    if (retobj.status === 200) {
+      setDealer(retobj.dealer);
     }
-  }
+  };
 
-  const get_cars = async ()=>{
-    const res = await fetch(carmodels_url, {
-      method: "GET"
-    });
+  const get_cars = async () => {
+    const res = await fetch(carmodels_url, { method: "GET" });
     const retobj = await res.json();
-    
-    let carmodelsarr = Array.from(retobj.CarModels)
-    setCarmodels(carmodelsarr)
-  }
+    setCarmodels(retobj.CarModels);
+  };
+  
   useEffect(() => {
     get_dealer();
     get_cars();
